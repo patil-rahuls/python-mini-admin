@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>{{title}} For MySQL</title>
+        <meta name="description" content="Lightweight tool for quick and easy access to MySQL databases">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        
+        {% load static %}
+        <link rel="stylesheet" type="text/css" href="{% static '/v1.css' %}" />
+        <link rel="shortcut icon" type="image/png" href="{% static '/favicon-16x16.png' %}"/>
+
+        <script>
+            const queryCheckerURL = "{% url 'validateQuery' %}";
+            // let syncTablesURL = "{ % url 'syncTables' %}";
+            const queryOk = {% if queryResultFields|length %}true{% else %}false{% endif %};
+        </script>
+    </head>
+    <body>
+
+        <!-- Hidden Form to post connection id to edit form -->
+        <form method="POST" action="edit/" id="editForm" class="hide">
+            {% csrf_token %}
+            <input class="hide" name="id" value="{{conn}}" >
+        </form>
+
+        <!-- HEADER -->
+        <header>
+            <li>
+                <small class="left toggleSidebar {{hideMainElements}}">◀ ▶</small>
+                <small class="left" >MySQL Connection : &nbsp;
+                    <span id="add"  onClick="loadConnectionForm(this.id)" class="right">&nbsp; ➕ </span>
+                    <span id="edit" onClick="loadConnectionForm(this.id)" class="right {{hideEdit}}">&nbsp; 🔧 </span>
+                    <form class="right" method="post">
+                        {% csrf_token %}
+                        <select name="conn" onchange="showMessage('Connecting ', 'loading'); this.form.submit()">
+                            <option value="0" selected> &nbsp; My Connections &nbsp;&nbsp;&nbsp;&nbsp;</option>
+                            {% for connection in allConns %}
+                            <option value="{{connection.id}}" {% if conn|safe == connection.id|safe %} selected {% endif %} > &nbsp; {{connection.identifier}} &nbsp; </option>
+                            {% endfor %}
+                        </select>
+                    </form>
+                </small>               
+                <small class="right transparentBG"><i><span data-href="https://rahulspatil.in">{{title}} Ver {{version}}</span></i></small>            
+                <small class="toggleQueryArea {{hideMainElements}}" style="background-color: yellow;color:#000;"> ▼ </small>
+                <small class="execStmt {{hideMainElements}}" > 🔥 </small>
+                <small class="queryTabs hide transparentBG"><i>Tip: Append a semicolon at the end of the your statement to validate it.</i></small>
+            </li>
+        </header>
+
+        <!-- Add New Connection Menu 
+        <div class="hide" id="connection">
+            <table>
+                <tr>
+                    <th colspan="2">Editing Connection: <b>{ {connname}}</b></th>
+                </tr>
+                <tr>
+                    <td colspan="2">&nbsp;</td>
+                </tr>
+                < !-- { % for field in form %} -- >
+                    <tr>
+                        <td>{ {field.label_tag}}</td> 
+                        <td>{ {field}}</td>
+                    </tr>
+                < !-- { % endfor %} -- >
+                <tr>
+                    <td colspan="2">&nbsp;</td>
+                </tr>
+                <tr>
+                    <th>
+                        <button id="save" value="Save">Save</button>
+                    </th>
+                    <th>
+                        < !-- { % if result == "1" %}  -- >
+                            <span class="msg ok">Connection Saved Successfully</span>
+                        < !-- { % elif result == "0" %}  -- >
+                           <span class="msg err">Failed. Some info missing.</span>
+                        < !-- { % else %}  -- >
+                            <span id="loaxding" class="msg loading">Please wait 
+                                < !-- { % for i in loaderDotsCount %}     -- >
+                                   <span class="loader__dot">.</span> 
+                                < !-- { % endfor %} -- >
+                            </span>
+                        < !-- { % endif %} -- >
+                    </th>
+                </tr>
+            </table>
+        </div> -->
+
+        <!-- PLAYGROUND -->        
+        <div id="content" class="{{hideMainElements}}">            
+            <!-- Sidebar that lists all th DBs -->
+            <div id="sidebar" class="collapsed">
+                <!-- <br><span class="syncTables" style="cursor: pointer;"> ↻ Refresh</span> -->
+                <br><span>Tables</span>                
+                {% if tables %}
+                    {% for table in tables %}
+                        <span id="{{table}}" onclick="select_table(this.id)"> &nbsp; ▦ {{table}}</span>
+                    {% endfor %}
+                {% else %}
+                    <span>No Tables Found</span>
+                {% endif %}
+                <br><br><br><br><br><br>
+            </div>
+
+            <!-- Query Area where user prepares query -->
+            <div id="queryArea" class="{{queryAreaState}}"> 
+                <form id="fire" method="POST">
+                    {% csrf_token %}
+                    <input name="conn" id="conn" value="{{conn}}" class="hide" hidden>
+                    <textarea onkeyup="validateOnSemiColon(this.value)" onmouseup="this.onkeyup()" id="query" name="query" placeholder="Prepare MySQL Query Here...">{{query}}</textarea>                                        
+                </form>                            
+            </div>
+            
+            <!-- Result Area Where Query result is shown -->            
+            <div id="resultArea" class="{{resultAreaState}}"> 
+                <table id="breadcrumbsTable">
+                    <tr>
+                        <th>                            
+                            &nbsp;<button class="exportCSV">Download CSV</button>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            &nbsp;<button onclick="scroll_pag(4);"> ◄ </button>                            
+                            &nbsp;<button onclick="scroll_pag(2);"> ► </button>
+                            &nbsp;<button id="page-1" onclick="selectRange(this.value)" value="0,50">0-50</button>
+                            &nbsp;<button id="page-2" onclick="selectRange(this.value)" value="51,100">51-100</button>
+                            &nbsp;<button id="page-3" onclick="selectRange(this.value)" value="101,150">101-150</button>
+                            &nbsp;<button id="page-4" onclick="selectRange(this.value)" value="151,200">151-200</button>
+                        </th>
+                    </tr>
+                </table>
+                <table id="resultTable">
+                    <tr>
+                    {% for field in queryResultFields %}
+                        <th> {{field}} </th>
+                    {% endfor %}
+                    </tr>
+                    {% if queryResultRows %}
+                        {% for row in queryResultRows %}
+                            <tr>
+                            {% for val in row %} 
+                                <td> {{val}} </td> 
+                            {% endfor %} 
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="all"> No results found. </td>
+                    </tr>
+                    {% endif %}
+                </table>
+            </div>
+        </div>       
+
+        <!-- Query results / messages here. THIS IS NOT FOOTER. -->
+        <footer id="messageArea">
+            <small id="message" class="msg {{messageState}}">{{message}} </small>
+        </footer>
+
+        <!-- FOOTER -->
+        <footer>
+            <li>
+                <span class="left {{statusState}}">Status: <span>⬤ {{status}}</span></span>
+                <span class="left">MySQL-Server: <span style="color:lightcoral">{{serverInfo}}</span></span>
+                <span class="left">DB:           <span style="color:violet">{{dbName}}</span></span>
+                <span class="right">&nbsp;       </span>
+                <span class="right">created by   <span data-href="https://rahulspatil.in">Rahul Patil</span></span>
+                <span class="right">Fetch Time:  <span>{{fetchTime}} seconds</span></span>
+                <span class="right {{slowQuery}}">Query Time:  <span> {{queryTime}} seconds</span> </span>
+                <span class="right">Records:     <span style="color:yellow">{{queryResultRows|length}}</span></span>
+            </li>
+        </footer>  
+
+        <!-- SCRIPTS -->
+        <script src="{% static '/v1.js' %}"></script>
+    </body>
+</html>

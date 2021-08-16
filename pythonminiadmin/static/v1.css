@@ -1,0 +1,294 @@
+*{
+    font-family: Helvetica, "Trebuchet MS", Verdana, sans-serif;
+    outline:none;
+    font-size:12px;
+    color:#fff;
+}
+body{
+    margin:0 !important;
+    background-color: #313233;
+}
+.hide{
+    display:none;
+}
+.show{
+    display:block;
+}
+.left{
+    float: left;
+}
+.right{
+    float: right;
+}
+header{
+    position: fixed;
+    display: inline-block;
+    width: 100%;
+    height: 30px;
+    z-index: 99999;
+    top: 0;
+    left: 0;
+    text-align: center;
+    list-style: none;
+    background-color: #000;
+    box-shadow:  1px 2px 6px #000;
+}
+header li{
+    padding:6px 10px;
+}
+header li > *{
+    background-color:#313233;
+    padding: 2px 10px;
+    border-radius:2px;
+}
+footer {
+    position: fixed;
+    display: inline-block;
+    width: 100%;
+    height: 16px;
+    z-index: 99999;
+    left: 0;
+    bottom: 0;
+    padding:2px 10px;
+    list-style: none;
+    background-color: #000;
+    box-shadow:  1px -2px 6px #000;
+}
+footer li > *{
+    padding:1px 10px;
+    cursor: auto;
+}
+footer li span{
+    font-size: 11px;
+}
+
+/* Table Styles */
+table{
+    border-collapse: collapse;
+    width: 100%;
+    border-spacing: 0;
+}
+table th, table td{
+    text-align: left;
+    padding: 1px 8px;
+    word-wrap: break-word;
+    max-width: 500px;
+}
+table th{
+    position: sticky;
+    z-index: 77777;
+    top: 0;
+    padding: 4px;
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);
+    background-color: #111213;
+}
+table tr:nth-child(even) {
+    background-color: #313233;
+}
+table tr:nth-child(odd) {
+    background-color: #515253;
+}
+table tr:hover, table tr:focus{
+    background-color: #818283;
+}   
+table tr:last-child th:first-child {
+    border-bottom-left-radius: 6px;
+}
+table tr:last-child th:last-child {
+    border-bottom-right-radius: 6px;
+}
+#resultArea #breadcrumbsTable{
+    position: fixed;
+    z-index: 77777;
+}
+#resultArea #breadcrumbsTable, #resultArea #breadcrumbsTable tr, #resultArea #breadcrumbsTable tr td{
+    padding:5px;
+}    
+#resultArea #breadcrumbsTable tr th .active{ 
+    background-color: #313233;
+    color: #fff;
+}
+#resultArea #resultTable{
+    margin:30px 0;
+}
+#resultArea #breadcrumbsTable th{
+    background-color:navajowhite;
+    top: 50px; /* Don't forget this, required for the stickiness */
+}
+#resultArea #resultTable th{
+    top: 55px; /* Don't forget this, required for the stickiness */
+}
+
+/* Main container div, Sidebar, QueryArea. resultArea is defined above coz its childs are all tables */
+#content{
+    width:100%;
+    margin-top: 30px;
+    display: flex;
+}
+#content #sidebar {
+    position: fixed;
+    z-index: 99999;
+    width: auto;
+    overflow: auto;
+    height: 100% !important;
+    background-color:#111213;
+    border:1px solid #000;
+    transition: all .1s;
+}
+#content #sidebar.collapsed {
+    transform: translateX(-100%);
+    position: absolute;
+}
+#content #sidebar > *{
+    padding: 2px 8px;
+    cursor: pointer; 
+    color:deepskyblue;
+    display: list-item;
+}
+#content #sidebar > *:hover{
+    color:orange;
+}
+#content #queryArea textarea{
+    display:block;
+    position: fixed;
+    z-index: 88888;
+    background-color:#111213;
+    border:1px solid #000;
+    width:84%;
+    max-width:84%;
+    min-width:84%;
+    height:30%;
+    min-height:10%;
+    max-height:70%;
+    padding: 8px;
+    font-size: 14px;
+    box-shadow: 1px 2px 4px #000;
+}
+#content #queryArea textarea:focus{
+    color: #fff !important;
+}
+#messageArea{
+    background-color: transparent;
+    width: 100%;
+    height: 40px;
+    box-shadow: none;
+}
+/* Add/Edit connection */
+#connection{
+    position: fixed;
+    margin-left: 5%;
+    z-index: 999999;
+    border-bottom-left-radius :6px;
+    border-bottom-right-radius :6px;
+    color:#fff;
+    background-color: #000;
+    box-shadow:  1px 2px 6px #000;
+}
+#connection table th{
+    background-color: #000;
+    padding:8px;
+}
+#connection table td{
+    color:#000;
+}
+#connection table tr:nth-child(even) {
+    background-color: #818283;
+}
+#connection table tr:nth-child(odd) {
+    background-color: #b3b3b3;
+}
+/* Blur filter effect on #content when #connection is shown.  */
+.blur{
+    -webkit-filter: blur(3px);
+    -moz-filter: blur(3px);
+    -o-filter: blur(3px);
+    -ms-filter: blur(3px);
+    filter: blur(3px);
+    width:98% !important;
+}
+
+/* Error / Success Messages  */
+.msg{
+    padding:2px 4px;
+    width:fit-content;
+    border-radius: 2px;
+    font-weight:600;
+}
+.ok { 
+    background-color:#0F9D58;
+}
+.err { 
+    background-color:#de5246;
+}
+.loading{
+    background-color:orange;
+}
+/* Loading text and three animated dots */
+    @keyframes blink {50% { color: transparent }}
+    .loader__dot { 
+        animation: 1s blink infinite 
+    }
+    .loader__dot:nth-child(2) { 
+        animation-delay: 250ms 
+    }
+    .loader__dot:nth-child(3) { 
+        animation-delay: 500ms 
+    }
+/* ENDS Loading text and three animated dots */
+
+/* INPUTS */
+input[type="password"], input[type="text"], select{
+    color: #313233;
+    border: 1px solid #ddd;
+    border-radius: 2px;
+    box-shadow: inset 1px 1px 2px #ddd;
+    background: #fff;
+}
+select{
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    outline: none;
+    background: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBkPSJNMjIgMTguMDU1djIuNDU4YzAgMS45MjUtNC42NTUgMy40ODctMTAgMy40ODctNS4zNDQgMC0xMC0xLjU2Mi0xMC0zLjQ4N3YtMi40NThjMi40MTggMS43MzggNy4wMDUgMi4yNTYgMTAgMi4yNTYgMy4wMDYgMCA3LjU4OC0uNTIzIDEwLTIuMjU2em0tMTAtMy40MDljLTMuMDA2IDAtNy41ODgtLjUyMy0xMC0yLjI1NnYyLjQzNGMwIDEuOTI2IDQuNjU2IDMuNDg3IDEwIDMuNDg3IDUuMzQ1IDAgMTAtMS41NjIgMTAtMy40ODd2LTIuNDM0Yy0yLjQxOCAxLjczOC03LjAwNSAyLjI1Ni0xMCAyLjI1NnptMC0xNC42NDZjLTUuMzQ0IDAtMTAgMS41NjItMTAgMy40ODhzNC42NTYgMy40ODcgMTAgMy40ODdjNS4zNDUgMCAxMC0xLjU2MiAxMC0zLjQ4NyAwLTEuOTI2LTQuNjU1LTMuNDg4LTEwLTMuNDg4em0wIDguOTc1Yy0zLjAwNiAwLTcuNTg4LS41MjMtMTAtMi4yNTZ2Mi40NGMwIDEuOTI2IDQuNjU2IDMuNDg3IDEwIDMuNDg3IDUuMzQ1IDAgMTAtMS41NjIgMTAtMy40ODd2LTIuNDRjLTIuNDE4IDEuNzM4LTcuMDA1IDIuMjU2LTEwIDIuMjU2eiIvPjwvc3ZnPg==") 96% / 10% no-repeat #fff;
+    background-color:#fff;
+}
+select option{
+    background-color:#fff;   
+    color:#313233;   
+}
+button{
+    color:#000;
+    background-color: #818283;
+    border: 0;
+    border-radius: 4px;
+    padding: 2px 10px;
+    outline: none;
+    cursor: pointer;
+}
+button:hover{
+    color:#fff;
+    background-color: #313233;
+    outline: none;
+    text-decoration: none;
+}
+
+/* Links and rest elements */
+span[data-href]{
+    cursor:pointer;
+}
+a, a:visited, a:focus, small, small:visited, small:focus, button, input[type="reset"], input[type="submit"], button:focus, input[type="reset"]:focus, input[type="submit"]:focus, button:hover, input[type="reset"]:hover, input[type="submit"]:hover{
+    outline:none;
+    text-decoration: none;
+}
+a:hover{
+    color:orange;
+}
+/* some headers fixes . but m too lazy to normalize these.*/
+small{
+    float: right;
+    margin-right: 20px;
+    cursor: pointer;
+}
+.transparentBG{
+    background-color:transparent;
+}

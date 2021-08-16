@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>{{title}} For MySQL</title>
+        <meta name="description" content="Lightweight tool for quick and easy access to MySQL databases">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        
+        {% load static %}
+        <link rel="stylesheet" type="text/css" href="{% static '/v1.css' %}" />
+        <link rel="shortcut icon" type="image/png" href="{% static '/favicon-16x16.png' %}"/>
+    </head>
+    <body>
+
+        <!-- HEADER -->
+        <header>
+            <li>    
+                <small class="left"><a href="../">◀</a></small>                
+                <small class="right transparentBG"><i><span data-href="https://rahulspatil.in">{{title}} Ver {{version}}</span></i></small>            
+            </li>
+        </header>
+
+        <!-- Add New Connection Menu  -->
+        <div id="connection" style="margin-left:50px;margin-top:30px;">
+            <form id="add" method="POST">
+                {% csrf_token %}
+                <table>
+                    <tr>
+                        <th colspan="2">Adding a new MySQL connection</th>
+                    </tr>
+                    <tr>
+                        <td colspan="2">&nbsp;</td>
+                    </tr>
+                    {% for field in form %}
+                        <tr>
+                            <td>{{field.label_tag}}</td> 
+                            <td>{{field}}</td>
+                        </tr>
+                    {% endfor %}
+                    <tr>
+                        <td colspan="2">&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <th>
+                            <button id="save" value="Save">Save</button>
+                        </th>
+                        <th>
+                            {% if message %} 
+                                <span class="msg {{result}}">{{message}}</span>
+                            {% else %} 
+                                <span class="msg loading hide">Please wait 
+                                    <span class="loader__dot">.</span> 
+                                    <span class="loader__dot">.</span> 
+                                    <span class="loader__dot">.</span> 
+                                </span>
+                            {% endif %}
+                        </th>
+                    </tr>
+                </table>
+            </form>
+        </div>
+
+        <!-- FOOTER -->
+        <footer>
+            <li>
+                <span class="right">&nbsp;       </span>
+                <span class="right">created by   <span data-href="https://rahulspatil.in">Rahul Patil</span></span>
+            </li>
+        </footer>  
+
+        <!-- SCRIPTS -->
+        <script>
+            for(const link of document.querySelectorAll('span[data-href]')){
+                link.addEventListener('click', function(e){
+                    window.open(e.target.getAttribute('data-href'), '_blank');
+                });   
+            }
+
+            document.getElementById('save').onclick = function() {
+                const saveForm = document.getElementById("add");
+
+                for(const input of saveForm.elements){
+                    input.value = input.value.trim();
+                    if(!input.value)
+                        return;
+                }
+
+                document.querySelector('.loading').classList.remove('hide');
+                for( input of saveForm.elements)
+                    input.readOnly = true;
+                saveForm.submit();
+            }
+        </script>
+    </body>
+</html>

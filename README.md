@@ -49,7 +49,7 @@ python manage.py runserver
 **_I hope this gets the app up and running on your machine. Let me know if you get stuck on any of these steps._**
 
 ## Troubleshooting:
-- For Django Server Error: `port is already in use` you can free up the port using the following commands.
-linux users: `sudo fuser -k 8000/tcp`
-OSX users  : `sudo lsof -t -i tcp:8000 | xargs kill -9`
+- For Django Server Error: `port is already in use` you can free up the port using the following commands.  
+linux users: `sudo fuser -k 8000/tcp`  
+OSX users  : `sudo lsof -t -i tcp:8000 | xargs kill -9`  
 

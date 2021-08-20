@@ -158,14 +158,15 @@ document.getElementById('query').addEventListener('focus', function(){
         http.onreadystatechange = function() {
             if (http.readyState == XMLHttpRequest.DONE){
                 if(IsJsonString(http.responseText)){
-                    if(http.responseText.includes("Error:")){
-                        document.getElementById('query').style.color = 'orangered !important';
-                        showMessage(http.responseText, "err");            
-                    }else{                
+                    explainTable = JSON.parse(http.responseText);
+                    if (typeof explainTable == "object"){
                         document.getElementById('query').style.color = '#fff !important';
-                        explainTable = JSON.parse(http.responseText);
                         showMessage("Query looks valid!! No errors found!! Check Browser's CONSOLE to view the result of EXPLAIN.");
                         console.table(explainTable);
+                    }
+                    else{ //if(!explainTable || explainTable.includes("Error:")){
+                        document.getElementById('query').style.color = 'orangered !important';
+                        showMessage(explainTable || "Please correct your query!", "err");            
                     }
                 }
                 else

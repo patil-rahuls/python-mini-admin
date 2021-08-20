@@ -9,8 +9,8 @@ git clone https://github.com/patil-rahuls/python-mini-admin.git
 
 2. **Create and Activate a virtual environment:**
 ```
-virtualenv env --no-site-packages
-source env/bin/activate
+virtualenv venv -p python3.6
+source venv/bin/activate
 ```
 
 3. **Install the project dependencies:**
@@ -18,11 +18,11 @@ source env/bin/activate
 pip install -r requirements.txt
 ```
 
-4. **Add the _CONFIG FILE_:**
-Generate a secret key using `django.core.management.utils.get_random_secret_key()` (Please google for more info).
-In the same directory where is manage.py, create a file `.env` and save the secret key in there _WITHOUT QUOTES_.
+4. **Add the _.env_:**  
+Generate a secret key using `django.core.management.utils.get_random_secret_key()` (Please google for more info).  
+In the same directory where manage.py exist, create a file `.env` and add the following info to it.
 ```
-SECRET_KEY = <_your_secret_key_>
+SECRET_KEY = _your_secret_key_
 DEBUG=True
 ```
 
@@ -49,7 +49,7 @@ python manage.py runserver
 **_I hope this gets the app up and running on your machine. Let me know if you get stuck on any of these steps._**
 
 ## Troubleshooting:
-- For Django Server Error: `port is already in use` you can free up the port using the following commands.
-linux users: `sudo fuser -k 8000/tcp`
-OSX users  : `sudo lsof -t -i tcp:8000 | xargs kill -9`
+- For Django Server Error: `port is already in use` you can free up the port using the following commands.  
+linux users: `sudo fuser -k 8000/tcp`  
+OSX users  : `sudo lsof -t -i tcp:8000 | xargs kill -9`  
 

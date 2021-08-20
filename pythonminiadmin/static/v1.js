@@ -8,7 +8,7 @@ for( link of links){
 }
 
 // Show message in messageArea
-    const showMessage = function(msg , typeClass){
+    const showMessage = function(msg , typeClass="ok"){
         const messageBox = document.getElementById('message');
         messageBox.classList=[];    
         messageBox.classList.add('msg');
@@ -21,6 +21,32 @@ for( link of links){
         }
 
         messageBox.innerHTML = msg;
+    };
+    const hideMessageAfter = function(timeout){
+        setTimeout(function(timeout){
+            document.getElementById('message').classList.add('hide');
+        }, timeout);
+    };
+
+// Copy text to clipboard
+    const copyToClipboard = function(text) {
+        // obj.focus();
+        // obj.select();
+        // try {
+        //     document.execCommand('copy');
+        //     showMessage("Copied !");
+        // } catch (err) {
+        //     console.warn('Couldn`t copy cell value to clipboard.');
+        // }
+        // obj.blur();
+        
+        // From https://stackoverflow.com/questions/400212/how-do-i-copy-to-the-clipboard-in-javascript
+        navigator.clipboard.writeText(text).then(function() {
+            hideMessageAfter(2000);
+            showMessage("Copied !");
+        }, function(err) {
+            console.error('Async: Could not copy text: ', err);
+        });
     };
 
 // Load Add/Edit connection form
@@ -51,14 +77,19 @@ for( link of links){
     };
 
 // Toggle Sidebar
-document.querySelector('.toggleSidebar').addEventListener('click', function(){
+const toggleSidebar = function(){
     document.getElementById('sidebar').classList.toggle('collapsed');
+}
+document.querySelector('.toggleSidebar').addEventListener('click', function(){
+    toggleSidebar();
 });
 
 // Toggle QueryArea View
 document.querySelector('.toggleQueryArea').addEventListener('click', function(){
     const queryArea = document.getElementById('queryArea');
     this.textContent= queryArea.classList.toggle('hide') ? " ▼ " : " ▲ ";
+    // Hide sidebar
+    document.getElementById('sidebar').classList.contains('collapsed') || toggleSidebar();
 });
 
 // Quick and simple export resultTable into a csv
@@ -97,6 +128,14 @@ document.querySelector('.exportCSV').addEventListener('click', function() {
     }
 });
 
+// Copy resultTable's cell content to clipboard on single click
+document.querySelector('#resultTable tbody').addEventListener('click', function(row){
+    const cellText = row.target.closest('td')?.innerHTML;
+    // console.log(cell.innerHTML, row.rowIndex, cell.cellIndex);
+    // console.log(cellText);
+    cellText && copyToClipboard(cellText);
+});
+
 // Change Textarea color on focused is query is ok
 document.getElementById('query').addEventListener('focus', function(){
     if(!queryOk)
@@ -125,16 +164,14 @@ document.getElementById('query').addEventListener('focus', function(){
                     }else{                
                         document.getElementById('query').style.color = '#fff !important';
                         explainTable = JSON.parse(http.responseText);
-                        showMessage("Query looks valid!! No errors found!! Check Browser's CONSOLE to view the result of EXPLAIN.", "ok");
+                        showMessage("Query looks valid!! No errors found!! Check Browser's CONSOLE to view the result of EXPLAIN.");
                         console.table(explainTable);
                     }
                 }
                 else
                     showMessage("SOmething went wrong. This will be fixed in the next commit.", "err");
                 
-                setTimeout(function(){
-                    document.getElementById('message').classList.add('hide');
-                }, 4000);
+                hideMessageAfter(4000);
             }
         }
         http.send(params);
@@ -391,12 +428,10 @@ docReady(function() {
 //     http.onreadystatechange = function() {
 //         if (http.readyState == XMLHttpRequest.DONE){
 //             if (http.responseText == "\"1\"")
-//                 showMessage("Query looks valid!! No errors found!!", "ok");
+//                 showMessage("Query looks valid!! No errors found!!");
 //             else if(http.responseText != "")
 //                 showMessage(http.responseText, "err");            
-//             setTimeout(function(){
-//                 document.getElementById('message').classList.add('hide');
-//             }, 4000);
+//             hideMessageAfter(4000);
 //         }
 //     }
 //     http.send(params);

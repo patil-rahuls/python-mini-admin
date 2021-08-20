@@ -6,7 +6,7 @@
 }
 body{
     margin:0 !important;
-    background-color: #313233;
+    background-color: grey;
 }
 .hide{
     display:none;
@@ -30,14 +30,13 @@ header{
     left: 0;
     text-align: center;
     list-style: none;
-    background-color: #000;
-    box-shadow:  1px 2px 6px #000;
+    background-color: #313233;
 }
 header li{
     padding:6px 10px;
 }
 header li > *{
-    background-color:#313233;
+    background-color:#515253;
     padding: 2px 10px;
     border-radius:2px;
 }
@@ -51,8 +50,8 @@ footer {
     bottom: 0;
     padding:2px 10px;
     list-style: none;
-    background-color: #000;
-    box-shadow:  1px -2px 6px #000;
+    background-color: #111213;
+    box-shadow:  0px -1px 6px #111213;
 }
 footer li > *{
     padding:1px 10px;
@@ -76,6 +75,7 @@ table th, table td{
 }
 table th{
     position: sticky;
+    position: -webkit-sticky;
     z-index: 77777;
     top: 0;
     padding: 4px;
@@ -83,13 +83,13 @@ table th{
     background-color: #111213;
 }
 table tr:nth-child(even) {
-    background-color: #313233;
-}
-table tr:nth-child(odd) {
     background-color: #515253;
 }
+table tr:nth-child(odd) {
+    background-color: #717273;
+}
 table tr:hover, table tr:focus{
-    background-color: #818283;
+    background-color: #111213;
 }   
 table tr:last-child th:first-child {
     border-bottom-left-radius: 6px;
@@ -109,10 +109,10 @@ table tr:last-child th:last-child {
     color: #fff;
 }
 #resultArea #resultTable{
-    margin:30px 0;
+    margin:30px 10px;
 }
 #resultArea #breadcrumbsTable th{
-    background-color:navajowhite;
+    background-color:#313233;
     top: 50px; /* Don't forget this, required for the stickiness */
 }
 #resultArea #resultTable th{
@@ -131,8 +131,7 @@ table tr:last-child th:last-child {
     width: auto;
     overflow: auto;
     height: 100% !important;
-    background-color:#111213;
-    border:1px solid #000;
+    background-color:#313233;
     transition: all .1s;
 }
 #content #sidebar.collapsed {

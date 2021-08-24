@@ -108,8 +108,8 @@
             <div id="queryArea" class="{{queryAreaState}}"> 
                 <form id="fire" method="POST">
                     {% csrf_token %}
-                    <input name="conn" id="conn" value="{{conn}}" class="hide" hidden>
-                    <textarea onkeyup="validateOnSemiColon(this.value)" onmouseup="this.onkeyup()" id="query" name="query" placeholder="Prepare MySQL Query Here...">{{query}}</textarea>                                        
+                    <input name="conn" id="conn" value="{{conn}}" class="hide" hidden>                    
+                    <textarea onkeyup="validateOnSemiColon(this.value)" onmouseup="this.onkeyup()" id="query" name="query" placeholder="Prepare MySQL Query Here...">{{query}}</textarea>
                 </form>                            
             </div>
             
@@ -173,5 +173,6 @@
 
         <!-- SCRIPTS -->
         <script src="{% static '/v1.js' %}"></script>
+        <script type="text/javascript" src="https://unpkg.com/sql-formatter@latest/dist/sql-formatter.min.js"></script>
     </body>
 </html>

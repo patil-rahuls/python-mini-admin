@@ -7,6 +7,69 @@ for( link of links){
     });   
 }
 
+// document.addEventListener('DOMContentLoaded', function () {
+//     let input = document.getElementById('query');
+//     // let output = document.getElementById('output');
+//     let output = "";
+//     function format() {
+//         console.time('formatting');
+//         output = sqlFormatter.format(input.value, {
+//             language: 'mysql'
+//         });
+//         console.timeEnd('formatting');
+//     }
+//     input.addEventListener('input', format);
+//     format();
+// });
+
+// to do next
+// Highlight MySQL reserved Keywords in queryArea.
+// https://stackoverflow.com/questions/37139076/change-color-of-specific-words-in-textarea#comment91526305_37160584
+// var keywords = ["SELECT","AS","CONCAT","GROUP_CONCAT","FROM","WHERE","ORDER BY","ASC","DESC","GROUP BY","LIKE","BETWEEN",,"FALSE","NULL","FROM","TRUE","NOT IN","NOT LIKE","NOT NULL"];
+// // To get all the MySQL reserved keywords do this -> SELECT group_concat(name) FROM mysql.help_keyword LIMIT 0,50000
+// document.querySelector(".queryEditor").addEventListener("keyup" , function(e){
+//     if (e.keyCode == 32){
+//         var newHTML = "";
+//         // Loop through words by splitting by line-breaks and spaces.
+//         // I want to preserve the delimeter/separator by which i am splitting so as to show the exaxct same view of query to user.
+//         // this.innerText.trim().split(/[\s]+/g).forEach(function(val) {
+//         this.innerText.trim().split(/[\n]+/g).forEach(function(val) {
+//             if (keywords.indexOf(val.trim().toUpperCase()) > -1)
+//                 newHTML += "<span class='statement'>" + val + "</span>";
+//             else
+//                 newHTML += "<span class='other'>" + val + "</span>";
+//             newHTML += "<br>";
+//         });
+//         this.innerHTML = newHTML;
+
+//         // newHTML = "";
+//         // this.innerText.trim().split(" ").forEach(function(val) {
+//         //     if (keywords.indexOf(val.trim().toUpperCase()) > -1)
+//         //         newHTML += "<span class='statement'>" + val + "</span>";
+//         //     else
+//         //         newHTML += "<span class='other'>" + val + "</span>";
+//         //     newHTML+="&nbsp;";
+//         // });
+//         // this.innerHTML = newHTML;
+
+//         // Set cursor postion to end of text
+//         var child = this.getElementsByTagName("*");
+//         var range = document.createRange();
+//         var sel = window.getSelection();
+//         range.setStart(child[child.length-1], 1);
+//         range.collapse(true);
+//         sel.removeAllRanges();
+//         sel.addRange(range);
+//         this.focus();
+//     }
+// });
+// Copy Plain-Text and not HTML while copy-pasting Query to query Editor
+// document.querySelector("div[contenteditable]").addEventListener("paste", function(e) {
+//     e.preventDefault();
+//     var text = e.clipboardData.getData("text/plain");
+//     document.execCommand("insertText", false, text);
+// });
+
 // Show message in messageArea
     const showMessage = function(msg , typeClass="ok"){
         const messageBox = document.getElementById('message');
@@ -30,16 +93,6 @@ for( link of links){
 
 // Copy text to clipboard
     const copyToClipboard = function(text) {
-        // obj.focus();
-        // obj.select();
-        // try {
-        //     document.execCommand('copy');
-        //     showMessage("Copied !");
-        // } catch (err) {
-        //     console.warn('Couldn`t copy cell value to clipboard.');
-        // }
-        // obj.blur();
-        
         // From https://stackoverflow.com/questions/400212/how-do-i-copy-to-the-clipboard-in-javascript
         navigator.clipboard.writeText(text).then(function() {
             hideMessageAfter(2000);
@@ -186,6 +239,15 @@ document.getElementById('query').addEventListener('focus', function(){
             // document.getElementById('query').value = stmt.replace(/(\r\n|\n|\r)/gm, "");
             document.getElementById('query').value = stmt;
             validate(stmt);
+            
+            // Format using sql-formatter.
+            let output = "";
+            (function() {
+                output = sqlFormatter.format(stmt, {
+                    language: 'mysql'
+                });
+            })();
+            document.getElementById('query').value = output;
         }
         else{
             const queryTabs = document.querySelector('.queryTabs').classList;
@@ -214,9 +276,12 @@ document.getElementById('query').addEventListener('focus', function(){
         document.getElementById('fire').submit();    
     };
 document.querySelector('.execStmt').addEventListener('click', execStmt);
+document.getElementById('query').addEventListener('click', function() {
+    document.getElementById('sidebar').classList.contains('collapsed') || document.getElementById('sidebar').classList.toggle('collapsed');
+});
 document.getElementById('query').addEventListener('keydown', function(eventObj) {
+    // Execute Query when Ctrl-Enter is pressed
     if (eventObj.ctrlKey && eventObj.keyCode == 13) {
-      // Ctrl-Enter pressed
       execStmt(this.value);
     }
 });
@@ -391,18 +456,7 @@ document.getElementById('query').addEventListener('keydown', function(eventObj) 
 
 // Usage
 docReady(function() {
-
     const stmtTxtArea = document.getElementById('query');
-
-    // If query ran successfully then hide QueryArea to view table.
-    // const toggleQueryArea = document.querySelector('.toggleQueryArea');
-    // if(queryOk){
-    //     toggleQueryArea.textContent = document.getElementById('queryArea').classList.toggle('hide') ? " ▼ " : " ▲ ";
-    // }else{
-    //     toggleQueryArea.textContent =" ▲ ";
-    //     stmtTxtArea.style.color = 'orangered';
-    // }
-
     // Get the limits if set
     let stmt = stmtTxtArea.value.trim();    
     if(queryOk && stmt.toUpperCase().includes("LIMIT")){
@@ -466,6 +520,9 @@ function IsJsonString(str) {
     return true;
 }
 
+  
+// To DO :
+// shw explain data somwhere.
 // window.console = {
 //     table: function(str){
 //         var node = document.createElement("div");
@@ -473,9 +530,5 @@ function IsJsonString(str) {
 //         document.getElementById("query").appendChild(node);
 //     }
 // }
-  
 
-// To DO :
-// shw explain data somwhere.
-// copy to Clipboard on clicking a cell in results table
 // tabs based query. store in localStorage

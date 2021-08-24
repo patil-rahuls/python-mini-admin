@@ -128,9 +128,9 @@ table tr:last-child th:last-child {
 #content #sidebar {
     position: fixed;
     z-index: 99999;
-    width: auto;
+    max-width: 300px;
     overflow: auto;
-    height: 100% !important;
+    height: 92% !important;
     background-color:#313233;
     transition: all .1s;
 }
@@ -166,7 +166,8 @@ table tr:last-child th:last-child {
 #content #queryArea textarea:focus{
     color: #fff !important;
 }
-#messageArea{
+
+#messageArea {
     background-color: transparent;
     width: 100%;
     height: 40px;
@@ -221,6 +222,7 @@ table tr:last-child th:last-child {
 }
 .loading{
     background-color:orange;
+    color:#313233;
 }
 /* Loading text and three animated dots */
     @keyframes blink {50% { color: transparent }}

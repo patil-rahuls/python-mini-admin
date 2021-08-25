@@ -40,8 +40,7 @@ for(link of links){
 }
 
 ///////////////////////////////////////////////////////////////////////
-// Show message in messageArea
-// Used Many Times
+// Show Message
 const showMessage = function(msg , typeClass="ok"){
     const messageBox = document.getElementById('message');
     messageBox.classList=[];    
@@ -58,7 +57,7 @@ const showMessage = function(msg , typeClass="ok"){
 };
 
 ///////////////////////////////////////////////////////////////////////
-// Hide message (in messageArea) after certain timeout
+// Hide Message after a certain timeout
 // Used ONLY with showMessage()
 const hideMessageAfter = function(timeout){
     setTimeout(function(timeout){
@@ -67,8 +66,7 @@ const hideMessageAfter = function(timeout){
 };
 
 ///////////////////////////////////////////////////////////////////////
-// Copy passed text to clipboard
-// From https://stackoverflow.com/questions/400212/how-do-i-copy-to-the-clipboard-in-javascript
+// https://stackoverflow.com/questions/400212/how-do-i-copy-to-the-clipboard-in-javascript
 // Used to copy resultTable's cell content to clipboard
 const copyToClipboard = function(text) {
     navigator.clipboard.writeText(text).then(function() {
@@ -80,7 +78,7 @@ const copyToClipboard = function(text) {
 };
 
 ///////////////////////////////////////////////////////////////////////
-// Copy resultTable's cell content to clipboard on single click
+// Copy resultTable's cell content to clipboard on a single click
 document.querySelector('#resultTable tbody').addEventListener('click', function(row) {
     const cellText = row.target.closest('td')?.innerHTML;
     cellText && copyToClipboard(cellText);
@@ -98,18 +96,18 @@ const loadConnectionForm = function(action){
 
 ///////////////////////////////////////////////////////////////////////
 // Toggle Sidebar
-const toggleSidebar = function(){
+const toggleSidebar = function() {
     document.getElementById('sidebar').classList.toggle('collapsed');
 }
 
 ///////////////////////////////////////////////////////////////////////
-document.querySelector('.toggleSidebar').addEventListener('click', function(){
+document.querySelector('.toggleSidebar').addEventListener('click', function() {
     toggleSidebar();
 });
 
 ///////////////////////////////////////////////////////////////////////
-// Toggle QueryArea View
-document.querySelector('.toggleQueryArea').addEventListener('click', function(){
+// Toggle QueryArea
+document.querySelector('.toggleQueryArea').addEventListener('click', function() {
     const queryArea = document.getElementById('queryArea').classList;
     this.textContent= queryArea.toggle('hide') ? " ▼ " : " ▲ ";
     // Hide sidebar
@@ -117,12 +115,19 @@ document.querySelector('.toggleQueryArea').addEventListener('click', function(){
 });
 
 ///////////////////////////////////////////////////////////////////////
-// Quick and simple export resultTable into a csv
+// Hide sidebar when clicked on query editor
+document.getElementById('query').addEventListener('click', function() {
+    const sidebar =  document.getElementById('sidebar').classList;
+    sidebar.contains('collapsed') || sidebar.toggle('collapsed');
+});
+
+///////////////////////////////////////////////////////////////////////
+// Export(Download) resultTable's content into a csv
 document.querySelector('.exportCSV').addEventListener('click', function() {
     const rows = document.querySelectorAll('table#resultTable tr');
-    if(rows.length){
+    if(rows.length) {
         const csv = [];
-        for(eachRow of rows){
+        for(eachRow of rows) {
             const csvRow = [];
             const colsOfEachRow = eachRow.querySelectorAll('td, th');
             for(eachColOfEachRow of colsOfEachRow) {
@@ -136,21 +141,16 @@ document.querySelector('.exportCSV').addEventListener('click', function() {
             csv.push(csvRow.join(';'));
         }
 
-        // Download it using custom headers
         const csvString = csv.join('\n');
-        var filename = 'export_' + new Date().toLocaleDateString() + '.csv';        
-        // Create a imaginary anchor tag to simulate csv download in background
-        const link = document.createElement('a'); 
+        var filename = 'export_' + new Date().toLocaleDateString() + '.csv';
+        const link = document.createElement('a');
         link.style.display = 'none';
         link.setAttribute('target', '_blank');
         link.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvString));
-        link.setAttribute('download', filename);        
-        // emulate that anchor link click 
+        link.setAttribute('download', filename);
         document.body.appendChild(link);
-        // once done, remove that link.
         link.click(); 
         document.body.removeChild(link); 
-        // and chill
     }
     else{
         showMessage("No results !!", "err");
@@ -158,15 +158,9 @@ document.querySelector('.exportCSV').addEventListener('click', function() {
 });
 
 ///////////////////////////////////////////////////////////////////////
-// Change Textarea color on focused is query is ok
-document.getElementById('query').addEventListener('focus', function(){
-    this.style.color = queryOk ? '#fff' : 'orangered';     
-});
-
-///////////////////////////////////////////////////////////////////////
 // Validate Query
 // Used in validateOnSemiColon()
-const validate = function(stmt){
+const validate = function(stmt) {
     showMessage("Checking Query ", "loading");    
     var conn_id = document.getElementById('conn').value;
     var params = 'test=' + stmt + '&conn_id=' + conn_id;
@@ -199,29 +193,19 @@ const validate = function(stmt){
 };
 
 ///////////////////////////////////////////////////////////////////////
-//
+// Detect a semicolon and validate the query before the semicolon.
+// Also Formats the query using sqlFormatter
 const validateOnSemiColon = function(stmt){
-    // Remove last semicolon
     if (stmt.slice(-1) === ';') {
         stmt = stmt.split(';')[0];
-        // This will avoid multiple semicolons at the end of query
         validate(stmt);
-        
         // Format using sql-formatter.
         document.getElementById('query').value = sqlFormatter.format(stmt, {language: 'mysql'});
-    }
-    else{
-        const tips = document.querySelector('.tips');
-        tips.innerHTML = "<i>Tip: Append a semicolon at the end of the your statement to validate it.</i>";
-        tips.classList.toggle('hide');
-        setTimeout(() => {
-            tips.classList.toggle('hide');
-        }, 3000);
     }
 };
 
 ///////////////////////////////////////////////////////////////////////
-// Fire Query 
+// Execute a query 
 const execStmt = function(stmt) {
     if(typeof stmt !== 'string' || !stmt)
         stmt = document.getElementById('query').value;
@@ -229,14 +213,24 @@ const execStmt = function(stmt) {
         document.getElementById('query').value = stmt;
     
     // Save the pagination states before executing
-    for(i of [1,2,3,4])
-        localStorage.setItem('page-'+i, document.getElementById('page-'+i).value);    
+    for (i of [1,2,3,4])
+        localStorage.setItem('page-'+i, document.getElementById('page-'+i).value);
 
-    // validate(stmt); // use this synchronously
     showMessage("Executing Query ", "loading");
-    document.getElementById('fire').submit();    
+
+    // Replace the current tab's contents with this query
+    // localStorage.setItem(`tab${lastTabID}`, stmt);
+    saveTab(lastTabID);
+
+    document.getElementById('fire').submit();
 };
 document.querySelector('.execStmt').addEventListener('click', execStmt);
+
+///////////////////////////////////////////////////////////////////////
+// Change query Textarea color on focus if query is ok
+document.getElementById('query').addEventListener('focus', function() {
+    this.style.color = queryOk ? '#00ff00' : 'orangered';     
+});
 
 ///////////////////////////////////////////////////////////////////////
 // Execute Query when Ctrl-Enter is pressed
@@ -247,21 +241,16 @@ document.getElementById('query').addEventListener('keydown', function(eventObj) 
 });
 
 ///////////////////////////////////////////////////////////////////////
-// Fire a query <Select * From table> from Sidebar.
+// Execute <Select * From table> from sidebar
 // Used in home.html
-const select_table = function(tbl){
+const select_table = function(tbl) {
     document.getElementById('sidebar').classList.toggle('collapsed');
-    execStmt('SELECT * FROM ' + tbl + ' LIMIT 0,50;');
+    execStmt('SELECT * FROM ' + tbl + ' LIMIT 0,50 ');
 };
 
 ///////////////////////////////////////////////////////////////////////
-document.getElementById('query').addEventListener('click', function() {
-    const sidebar =  document.getElementById('sidebar').classList;
-    sidebar.contains('collapsed') || sidebar.toggle('collapsed');
-});
-
-///////////////////////////////////////////////////////////////////////
 // Appends limit selected from pagination to the query and execute
+// Used in home.html
 const selectRange = function (range){
     const stmtElem = document.getElementById('query');
     let stmt = stmtElem.value;
@@ -269,17 +258,17 @@ const selectRange = function (range){
     // replace query with only single spaces between words
     stmt = stmt.replace(/\s\s+/g, ' ');
     
-    // Removes LIMIT used at the END of query. Ignores LIMIT used in the middle of the query.
+    // Removes LIMIT used at the END of query.
     const limitPresent = stmt.lastIndexOf("LIMIT");
-    if (limitPresent !== -1 || limitPresent !== -1)
+    if (limitPresent)
         stmt = stmt.substring(0, limitPresent);
     
-    stmtElem.value = stmt + ' LIMIT ' + range;
-    execStmt();
+    stmtElem.value = stmt + ' LIMIT ' + range ;
+    execStmt(stmtElem.value);
 };
 
 ///////////////////////////////////////////////////////////////////////
-// Handles pagination
+// Handles pagination (this only scrolls horizontally)
 const scroll_pag = function(direction){
     // 2 - RIGHT i.e. forward and 4 - LEFT i.e. backward
     switch(direction){
@@ -409,77 +398,98 @@ const scroll_pag = function(direction){
     }
 })("docReady", window);
 
-var lastTabID = 1; // this is the id of last tab used
-var maxTabs = 10;  // max number of tabs
-const tabs = [];   // stores queries
+///////////////////////////////////////////////////////////////////////
+// Variables for query tabs
+var lastTabID = localStorage.getItem(`lastTabID`) || 1 ; // id of the last tab used
+var maxTabs = 6;        // max number of tabs
+const tabs = [];        // stores queries
 
-const loadQueryTabs = function(){
-    document.querySelector("#queryTabs").innerHTML = "";
-    document.getElementById("query").value = "";
+///////////////////////////////////////////////////////////////////////
+// Load query tabs and their content from localstorage
+// const loadQueryTabs = function() {
+//     document.querySelector("#queryTabs").innerHTML = "";
+    
+//     // Iterate over and recover query from all tabs saved in localstorage
+//     for(let i =1; i<=maxTabs; i++) {
+//         const qry = localStorage.getItem(`tab${i}`);
+//         if(qry) {
+//             tabs.push(qry);
+//             document.querySelector("#queryTabs").innerHTML += `<button onclick="showTabContent(${i}, this);" id="tab${i}">Tab ${i}</button>`;
+//             lastTabID = i; // the last index where a query was found.
+//         }
+//         localStorage.removeItem(`tab${i}`);
+//     };
 
-    // Iterate Over all tabs saved in localstorage
-    for(let i =1; i<=maxTabs; i++) {
-        const qry = localStorage.getItem(`tab${i}`);
-        if(qry) {
-            console.log(qry);
-            tabs.push(qry);
-            document.querySelector("#queryTabs").innerHTML += `<a href="#" onclick="showTabContent(${i}, this);" id="tab${i}">Tab ${i}</a>`;
-            lastTabID = i; // the last index where a query was found.
-        }
-    };
+//     // Rearrange tabs in localstorage
+//     for([i, tab] of tabs.entries()) {
+//         console.log(`Saved tab${i+1}  => ` +  tab);
+//         localStorage.setItem(`tab${i+1}`, tab);
+//     }
+    
+//     // Show 1st tab as default one when no saved tabs are found.
+//     if (!tabs.length)
+//         document.querySelector("#queryTabs").innerHTML += `<button class="active" onclick="showTabContent(1, this);" id="tab1">Tab 1</button>`;
+//     else {
+//         // Set active tab and show active tab's content in query
+//         lastTabID = localStorage.getItem(`lastTabID`) || lastTabID;
+//         localStorage.setItem(`lastTabID`, lastTabID);
+//         // Log current tab
+//         console.log(`Current tab : Tab ${lastTabID}`);
+//         document.querySelector(`#tab${lastTabID}`).classList.add("active");
+//         document.getElementById("query").value = tabs[lastTabID-1];
+//     }
 
-    // Show default one tab when no data in localstorage.
-    if (!tabs.length)
-        document.querySelector("#queryTabs").innerHTML += `<a href="#" class="active" onclick="showTabContent(1, this);" id="tab1">Tab 1</a>`;
-    else{
-        // Set last tab active
-        document.querySelector(`#tab${lastTabID}`).classList.add("active");
-        // Show last tab's query on queryEditor
-        document.getElementById("query").value = tabs.slice(-1);
-    }
+//     // Add the "add new tab" button
+//     document.querySelector("#queryTabs").innerHTML += `<button id="addQueryTab"> + </button>`;
+// };
 
-    // Add the "add new tab" button
-    document.querySelector("#queryTabs").innerHTML += `<a href="#" id="addQueryTab"> + </a>`;
+///////////////////////////////////////////////////////////////////////
+// Save current tab content in localstorage BEFORE switching a tab 
+// OR BEFORE adding a new tab OR on clicking a tab
+const saveTab = function(tabID) {
+    localStorage.setItem(`tab${tabID}`, document.getElementById("query").value);
 };
 
 ///////////////////////////////////////////////////////////////////////
-// Saves current tab in localstorage BEFORE switching a Tab 
-// OR BEFORE creating a new tab.
-const saveTab = function(tabID){
-    console.log(`Saved tab${tabID}  => ` +  document.getElementById("query").value);
-    localStorage.setItem(`tab${tabID}`, document.getElementById("query").value);  
-};
-
-///////////////////////////////////////////////////////////////////////
-// Show a Tab 
-const showTabContent = function(tabID, this_tab){
+// Show a tab content on click and save other tab's query to localstorage
+const showTabContent = function(this_tab) {
     // Save last used tab
     saveTab(lastTabID);
+    
     // Remove active class from all childs
-    document.querySelector("#queryTabs").childNodes.forEach(function(val){val.classList = [];});
+    // document.querySelector("#queryTabs").childNodes.forEach(function(val){val.classList = [];});
+    for (let i=1; i<=maxTabs; i++) {
+        document.querySelector(`button[id='tab${i}']`).classList.remove("active");
+    }
+    
     // Make current Tab Active
     this_tab.classList.add("active");
+    
     // Show query from selected tab on queryEditor
-    document.getElementById("query").value = localStorage.getItem(`tab${tabID}`);
-    //set last used tab id as current's
-    lastTabID = tabID;
+    document.getElementById("query").value = localStorage.getItem(`${this_tab.id}`);
+    
+    // set last used tab id as current's
+    lastTabID = this_tab.id.slice(-1);
+    localStorage.setItem(`lastTabID` , lastTabID);
 };
 
 ///////////////////////////////////////////////////////////////////////
 // Adds a new tab
-const addTab = function(){
-    // Remove Last child + 
-    document.querySelector("#queryTabs").lastElementChild.remove();
-    // Remove active class from all childs
-    document.querySelector("#queryTabs").childNodes.forEach(function(val){val.classList = [];});
-    // Add a new tab btn
-    lastTabID = document.querySelector("#queryTabs").childNodes.length;
-    document.querySelector("#queryTabs").innerHTML += `<a href="#" class="active" onclick="showTabContent(${++lastTabID},this);" id="tab${lastTabID}">Tab ${lastTabID}</a>`;
-    // Add back the Last child + 
-    document.querySelector("#queryTabs").innerHTML += `<a href="#" id="addQueryTab"> + </a>`;
-    // Clear the queryEditor.
-    document.getElementById("query").value = "";   
-};
+// const addTab = function() {
+//     if(document.getElementById("query").value) {
+//         // Remove Last child + 
+//         document.querySelector("#queryTabs").lastElementChild.remove();
+//         // Remove active class from all childs
+//         document.querySelector("#queryTabs").childNodes.forEach(function(val){val.classList = [];});
+//         // Add a new tab btn
+//         lastTabID = document.querySelector("#queryTabs").childNodes.length;
+//         document.querySelector("#queryTabs").innerHTML += `<button class="active" onclick="showTabContent(${++lastTabID},this);" id="tab${lastTabID}">Tab ${lastTabID}</button>`;
+//         // Add back the Last child + 
+//         document.querySelector("#queryTabs").innerHTML += `<button id="addQueryTab"> + </button>`;
+//         // Clear the queryEditor.
+//         document.getElementById("query").value = "";
+//     }
+// };
 
 ///////////////////////////////////////////////////////////////////////
 // call docReady
@@ -488,13 +498,13 @@ docReady(function() {
     
     ///////////////////////////////////////////////////////////////////////
     // Get the limits if set
-    let stmt = stmtTxtArea.value.trim();    
-    if(queryOk && stmt.toUpperCase().includes("LIMIT")){
+    let stmt = stmtTxtArea.value.trim();
+    if(queryOk && stmt.toUpperCase().includes("LIMIT")) {
         const limits = stmtTxtArea.value.split('LIMIT')[1].trim();
         localStorage.setItem('limits', limits);
         
         // Fetch pagination details from localstorage and set
-        for(i of [1,2,3,4]){
+        for(i of [1,2,3,4]) {
             const paginationBtn = document.getElementById('page-'+i);
             paginationBtn.value = localStorage.getItem('page-'+i);
             paginationBtn.innerText = localStorage.getItem('page-'+i).replace(',','-');
@@ -502,43 +512,33 @@ docReady(function() {
             paginationBtn.classList.remove('active');
         }
         
-        // Set the  active limit
-        document.querySelectorAll("button[value='" + limits + "']")[0] && pag_btn.classList.add('active');
-        
-        const tips = document.querySelector('.tips');
-        tips.classList.toggle('hide');
-        tips.innerHTML = "<i>Tip: A single click on a cell inide result table copies its content to clipboard.</i>";
+        // Set the active limit
+        var pag_btn = document.querySelectorAll("button[value='" + limits + "']")[0];
+        pag_btn && pag_btn.classList.add('active');
     }
 
-    loadQueryTabs();
-
+    // loadQueryTabs();
+    stmtTxtArea.value = localStorage.getItem(`tab${lastTabID}`);
+    
+    // Set last used tab active
+    document.querySelector(`button[id='tab${lastTabID}']`).classList.add("active");
+    
     ///////////////////////////////////////////////////////////////////////
-    // Save tabs state to localstorage On add new tab
-    document.addEventListener("click", function(e) {
-        if(e.target && e.target.id == "addQueryTab"){        
-            if(lastTabID < maxTabs){
-                saveTab(lastTabID);
-                addTab();
-            }
-            else{
-                showMessage("Maximum 10 Tabs Allowed. (You can set variable 'maxTabs' for as many tabs as you want.)", "err");
-                hideMessageAfter(3000);
-            }
-        }
-    });
+    // Save tabs state to localstorage when adding a new tab
+    // document.addEventListener("click", function(e) {
+    //     if(e.target && e.target.id == "addQueryTab") {
+    //         if(lastTabID < maxTabs) {
+    //             saveTab(lastTabID);
+    //             addTab();
+    //         }
+    //         else{
+    //             showMessage(`Maximum ${maxTabs} Tabs Allowed. (You can set variable 'maxTabs' for as many tabs as you want.)`, "err");
+    //             hideMessageAfter(3000);
+    //         }
+    //     }
+    // });
 });
 
 // To DO :
-// shw explain data somwhere.
 // btn for sync tables in sidebar
-// make this a single page html. add/edit form  on same page.
-// window.console = {
-//     table: function(str){
-//         var node = document.createElement("div");
-//         node.appendChild(document.createTextNode(str));
-//         document.getElementById("query").appendChild(node);
-//     }
-// }
 // make a ajax common fn with async true / false param. use validate() before exec()
-
-

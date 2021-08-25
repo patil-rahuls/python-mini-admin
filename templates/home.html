@@ -41,12 +41,29 @@
                             {% endfor %}
                         </select>
                     </form>
-                </small>               
+                </small>
+                
+                <small class="left" > Database : &nbsp;
+                    <form class="right" method="post">
+                        {% csrf_token %}
+                        <select name="db" onchange="showMessage('Connecting ', 'loading'); this.form.submit()">
+                            <option value="0" selected> &nbsp; Select Database &nbsp;&nbsp;&nbsp;&nbsp;</option>
+                            {% for db in allDB %}
+                            <option value="{{db}}" {% if db|safe == db|safe %} selected {% endif %} > &nbsp; {{db}} &nbsp; </option>
+                            {% endfor %}
+                        </select>
+                    </form>
+                </small>
+
                 <small class="right transparentBG"><i><span data-href="https://rahulspatil.in">{{title}} Ver {{version}}</span></i></small>            
                 <small class="toggleQueryArea {{hideMainElements}}" style="background-color: yellow;color:#000;"> ▼ </small>
                 <small class="execStmt {{hideMainElements}}" > 🔥 </small>
-                <small class="tips hide transparentBG"><i> Tip: Append a semicolon at the end of the your statement to validate it.</i></small>
-                <small class="resultTips hide transparentBG"><i>Tip: A single click on a cell inide result table copies its content to clipboard.</i></small>
+                <!-- <small class="transparentBG">
+                    <marquee id="tips" behavior="scroll" direction="up" scrollamount="1">
+                        <i> Tip: Append a semicolon at the end of the your statement to validate it.</i>
+                        <i> Tip: A single click on a cell inide result table copies its content to clipboard.</i>
+                    </marquee>
+                </small> -->
             </li>
         </header>
 
@@ -107,13 +124,26 @@
 
             <!-- Query Area where user prepares query -->
             <div id="queryArea" class="{{queryAreaState}}"> 
+                <table id="queryTabs">
+                    <tr>
+                        <td style="background:#313233; padding:0;">
+                            <!-- <button id="addQueryTab" > &nbsp; + &nbsp; </button>  -->
+                            <button id="tab1" onclick="showTabContent(this)">Tab 1</button>
+                            <button id="tab2" onclick="showTabContent(this)">Tab 2</button>
+                            <button id="tab3" onclick="showTabContent(this)">Tab 3</button>
+                            <button id="tab4" onclick="showTabContent(this)">Tab 4</button>
+                            <button id="tab5" onclick="showTabContent(this)">Tab 5</button>
+                            <button id="tab6" onclick="showTabContent(this)">Tab 6</button>
+                        </td>
+                        <td style="background:#313233; padding:0">
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            <small><i class="tips"> Tip: Append a semicolon at the end of the your statement to validate it.</i></small>
+                        </td>
+                    </tr>
+                </table>
                 <form id="fire" method="POST">
                     {% csrf_token %}
                     <input name="conn" id="conn" value="{{conn}}" class="hide" hidden>
-                    <div id="queryTabs">
-                        <a href="#" id="tab1">Tab 1</a>
-                        <a id="addQueryTab" > &nbsp; + &nbsp; </a> 
-                    </div>
                     <textarea onkeyup="validateOnSemiColon(this.value)" onmouseup="this.onkeyup()" id="query" name="query" placeholder="Prepare MySQL Query Here...">{{query}}</textarea>
                 </form>                            
             </div>
@@ -131,6 +161,7 @@
                             &nbsp;<button id="page-2" onclick="selectRange(this.value)" value="51,100">51-100</button>
                             &nbsp;<button id="page-3" onclick="selectRange(this.value)" value="101,150">101-150</button>
                             &nbsp;<button id="page-4" onclick="selectRange(this.value)" value="151,200">151-200</button>
+                            <small><i class="tips"> Tip: A single click on a cell inide result table copies its content to clipboard.</i></small>
                         </th>
                     </tr>
                 </table>

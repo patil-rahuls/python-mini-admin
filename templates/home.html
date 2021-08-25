@@ -45,7 +45,8 @@
                 <small class="right transparentBG"><i><span data-href="https://rahulspatil.in">{{title}} Ver {{version}}</span></i></small>            
                 <small class="toggleQueryArea {{hideMainElements}}" style="background-color: yellow;color:#000;"> ▼ </small>
                 <small class="execStmt {{hideMainElements}}" > 🔥 </small>
-                <small class="queryTabs hide transparentBG"><i>Tip: Append a semicolon at the end of the your statement to validate it.</i></small>
+                <small class="tips hide transparentBG"><i> Tip: Append a semicolon at the end of the your statement to validate it.</i></small>
+                <small class="resultTips hide transparentBG"><i>Tip: A single click on a cell inide result table copies its content to clipboard.</i></small>
             </li>
         </header>
 
@@ -108,7 +109,11 @@
             <div id="queryArea" class="{{queryAreaState}}"> 
                 <form id="fire" method="POST">
                     {% csrf_token %}
-                    <input name="conn" id="conn" value="{{conn}}" class="hide" hidden>                    
+                    <input name="conn" id="conn" value="{{conn}}" class="hide" hidden>
+                    <div id="queryTabs">
+                        <a href="#" id="tab1">Tab 1</a>
+                        <a id="addQueryTab" > &nbsp; + &nbsp; </a> 
+                    </div>
                     <textarea onkeyup="validateOnSemiColon(this.value)" onmouseup="this.onkeyup()" id="query" name="query" placeholder="Prepare MySQL Query Here...">{{query}}</textarea>
                 </form>                            
             </div>

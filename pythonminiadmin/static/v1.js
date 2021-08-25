@@ -1,150 +1,122 @@
+///////////////////////////////////////////////////////////////////////
+// https://stackoverflow.com/questions/5100539/django-csrf-check-failing-with-an-ajax-post-request
+// Used in validate()
+const getCookie = function(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie != '') {
+        let cookies = document.cookie.split(';');
+        // for (var i = 0; i < cookies.length; i++) {
+        for (let cookie of cookies){
+            cookie = cookie.trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+///////////////////////////////////////////////////////////////////////
+// Validates a JSON
+// Used in validate()
+const IsJsonString = function(str) {
+    try {
+        JSON.parse(str);
+    } catch (e) {
+        return false;
+    }
+    return true;
+}
+
+///////////////////////////////////////////////////////////////////////
 // Immitate span[data-href] as anchor links
 const links = document.querySelectorAll('span[data-href]');
-for( link of links){
+for(link of links){
     link.addEventListener('click', function(e){
-        var ele = e.target;
-        window.open(ele.getAttribute('data-href'), '_blank');
+        window.open(e.target.getAttribute('data-href'), '_blank');
     });   
 }
 
-// document.addEventListener('DOMContentLoaded', function () {
-//     let input = document.getElementById('query');
-//     // let output = document.getElementById('output');
-//     let output = "";
-//     function format() {
-//         console.time('formatting');
-//         output = sqlFormatter.format(input.value, {
-//             language: 'mysql'
-//         });
-//         console.timeEnd('formatting');
-//     }
-//     input.addEventListener('input', format);
-//     format();
-// });
-
-// to do next
-// Highlight MySQL reserved Keywords in queryArea.
-// https://stackoverflow.com/questions/37139076/change-color-of-specific-words-in-textarea#comment91526305_37160584
-// var keywords = ["SELECT","AS","CONCAT","GROUP_CONCAT","FROM","WHERE","ORDER BY","ASC","DESC","GROUP BY","LIKE","BETWEEN",,"FALSE","NULL","FROM","TRUE","NOT IN","NOT LIKE","NOT NULL"];
-// // To get all the MySQL reserved keywords do this -> SELECT group_concat(name) FROM mysql.help_keyword LIMIT 0,50000
-// document.querySelector(".queryEditor").addEventListener("keyup" , function(e){
-//     if (e.keyCode == 32){
-//         var newHTML = "";
-//         // Loop through words by splitting by line-breaks and spaces.
-//         // I want to preserve the delimeter/separator by which i am splitting so as to show the exaxct same view of query to user.
-//         // this.innerText.trim().split(/[\s]+/g).forEach(function(val) {
-//         this.innerText.trim().split(/[\n]+/g).forEach(function(val) {
-//             if (keywords.indexOf(val.trim().toUpperCase()) > -1)
-//                 newHTML += "<span class='statement'>" + val + "</span>";
-//             else
-//                 newHTML += "<span class='other'>" + val + "</span>";
-//             newHTML += "<br>";
-//         });
-//         this.innerHTML = newHTML;
-
-//         // newHTML = "";
-//         // this.innerText.trim().split(" ").forEach(function(val) {
-//         //     if (keywords.indexOf(val.trim().toUpperCase()) > -1)
-//         //         newHTML += "<span class='statement'>" + val + "</span>";
-//         //     else
-//         //         newHTML += "<span class='other'>" + val + "</span>";
-//         //     newHTML+="&nbsp;";
-//         // });
-//         // this.innerHTML = newHTML;
-
-//         // Set cursor postion to end of text
-//         var child = this.getElementsByTagName("*");
-//         var range = document.createRange();
-//         var sel = window.getSelection();
-//         range.setStart(child[child.length-1], 1);
-//         range.collapse(true);
-//         sel.removeAllRanges();
-//         sel.addRange(range);
-//         this.focus();
-//     }
-// });
-// Copy Plain-Text and not HTML while copy-pasting Query to query Editor
-// document.querySelector("div[contenteditable]").addEventListener("paste", function(e) {
-//     e.preventDefault();
-//     var text = e.clipboardData.getData("text/plain");
-//     document.execCommand("insertText", false, text);
-// });
-
+///////////////////////////////////////////////////////////////////////
 // Show message in messageArea
-    const showMessage = function(msg , typeClass="ok"){
-        const messageBox = document.getElementById('message');
-        messageBox.classList=[];    
-        messageBox.classList.add('msg');
-        messageBox.classList.add(typeClass);
-        
-        // Three animated dots in Loading...
-        if(typeClass === 'loading'){
-            for(i of [0,0,0])
-                msg += "<span class='loader__dot'>.</span>";
-        }
+// Used Many Times
+const showMessage = function(msg , typeClass="ok"){
+    const messageBox = document.getElementById('message');
+    messageBox.classList=[];    
+    messageBox.classList.add('msg');
+    messageBox.classList.add(typeClass);
+    
+    // Three animated dots in Loading...
+    if(typeClass === 'loading'){
+        for(i of [0,0,0])
+            msg += "<span class='loader__dot'>.</span>";
+    }
 
-        messageBox.innerHTML = msg;
-    };
-    const hideMessageAfter = function(timeout){
-        setTimeout(function(timeout){
-            document.getElementById('message').classList.add('hide');
-        }, timeout);
-    };
+    messageBox.innerHTML = msg;
+};
 
-// Copy text to clipboard
-    const copyToClipboard = function(text) {
-        // From https://stackoverflow.com/questions/400212/how-do-i-copy-to-the-clipboard-in-javascript
-        navigator.clipboard.writeText(text).then(function() {
-            hideMessageAfter(2000);
-            showMessage("Copied !");
-        }, function(err) {
-            console.error('Async: Could not copy text: ', err);
-        });
-    };
+///////////////////////////////////////////////////////////////////////
+// Hide message (in messageArea) after certain timeout
+// Used ONLY with showMessage()
+const hideMessageAfter = function(timeout){
+    setTimeout(function(timeout){
+        document.getElementById('message').classList.add('hide');
+    }, timeout);
+};
 
+///////////////////////////////////////////////////////////////////////
+// Copy passed text to clipboard
+// From https://stackoverflow.com/questions/400212/how-do-i-copy-to-the-clipboard-in-javascript
+// Used to copy resultTable's cell content to clipboard
+const copyToClipboard = function(text) {
+    navigator.clipboard.writeText(text).then(function() {
+        hideMessageAfter(2000);
+        showMessage("Copied !");
+    }, function(err) {
+        console.error('Async: Could not copy text: ', err);
+    });
+};
+
+///////////////////////////////////////////////////////////////////////
+// Copy resultTable's cell content to clipboard on single click
+document.querySelector('#resultTable tbody').addEventListener('click', function(row) {
+    const cellText = row.target.closest('td')?.innerHTML;
+    cellText && copyToClipboard(cellText);
+});
+
+///////////////////////////////////////////////////////////////////////
 // Load Add/Edit connection form
-    const loadConnectionForm = function(action){
-        if(action=='edit')
-            document.getElementById('editForm').submit();
-        else
-            window.open(action, "_self");
+// Used in home.html
+const loadConnectionForm = function(action){
+    if(action=='edit')
+        document.getElementById('editForm').submit();
+    else
+        window.open(action, "_self");
+};
 
-        // To do next feature - ajax
-        // const connectionFormAppearance = document.getElementById('connection').classList;
-        // const contentAppearance = document.getElementById('content').classList;
-        
-        // // Show form and blur bg
-        // if(!connectionFormAppearance.toggle('hide')){
-        //     contentAppearance.add('blur');
-            
-        //     // send ajax req to fetch form Data.
-        //     if(action=='add'){
-        //         // Add
-                
-        //     }else{
-        //         // Edit
-        //     }
-        // }
-        // else
-        //     contentAppearance.remove('blur');
-    };
-
+///////////////////////////////////////////////////////////////////////
 // Toggle Sidebar
 const toggleSidebar = function(){
     document.getElementById('sidebar').classList.toggle('collapsed');
 }
+
+///////////////////////////////////////////////////////////////////////
 document.querySelector('.toggleSidebar').addEventListener('click', function(){
     toggleSidebar();
 });
 
+///////////////////////////////////////////////////////////////////////
 // Toggle QueryArea View
 document.querySelector('.toggleQueryArea').addEventListener('click', function(){
-    const queryArea = document.getElementById('queryArea');
-    this.textContent= queryArea.classList.toggle('hide') ? " ▼ " : " ▲ ";
+    const queryArea = document.getElementById('queryArea').classList;
+    this.textContent= queryArea.toggle('hide') ? " ▼ " : " ▲ ";
     // Hide sidebar
     document.getElementById('sidebar').classList.contains('collapsed') || toggleSidebar();
 });
 
+///////////////////////////////////////////////////////////////////////
 // Quick and simple export resultTable into a csv
 document.querySelector('.exportCSV').addEventListener('click', function() {
     const rows = document.querySelectorAll('table#resultTable tr');
@@ -167,205 +139,203 @@ document.querySelector('.exportCSV').addEventListener('click', function() {
         // Download it using custom headers
         const csvString = csv.join('\n');
         var filename = 'export_' + new Date().toLocaleDateString() + '.csv';        
-        const link = document.createElement('a'); // Create a imaginary anchor tag to simulate csv download in background
+        // Create a imaginary anchor tag to simulate csv download in background
+        const link = document.createElement('a'); 
         link.style.display = 'none';
         link.setAttribute('target', '_blank');
         link.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvString));
         link.setAttribute('download', filename);        
-        document.body.appendChild(link); // emulate that anchor link click 
-        link.click(); // once done, remove that link.
-        document.body.removeChild(link); // and chill
+        // emulate that anchor link click 
+        document.body.appendChild(link);
+        // once done, remove that link.
+        link.click(); 
+        document.body.removeChild(link); 
+        // and chill
     }
     else{
         showMessage("No results !!", "err");
     }
 });
 
-// Copy resultTable's cell content to clipboard on single click
-document.querySelector('#resultTable tbody').addEventListener('click', function(row){
-    const cellText = row.target.closest('td')?.innerHTML;
-    // console.log(cell.innerHTML, row.rowIndex, cell.cellIndex);
-    // console.log(cellText);
-    cellText && copyToClipboard(cellText);
-});
-
+///////////////////////////////////////////////////////////////////////
 // Change Textarea color on focused is query is ok
 document.getElementById('query').addEventListener('focus', function(){
-    if(!queryOk)
-        this.style.color = 'orangered';
-    else
-        this.style.color = '#fff';     
+    this.style.color = queryOk ? '#fff' : 'orangered';     
 });
 
+///////////////////////////////////////////////////////////////////////
 // Validate Query
-    const validate = function(stmt){
-        showMessage("Checking Query ", "loading");
-        
-        var conn_id = document.getElementById('conn').value;
-        var params = 'test=' + stmt + '&conn_id=' + conn_id;
-        
-        var http = new XMLHttpRequest();
-        http.open('POST', queryCheckerURL, true); // 3rd argument is sync / async 
-        http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-        http.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-        http.onreadystatechange = function() {
-            if (http.readyState == XMLHttpRequest.DONE){
-                if(IsJsonString(http.responseText)){
-                    explainTable = JSON.parse(http.responseText);
-                    if (typeof explainTable == "object"){
-                        document.getElementById('query').style.color = '#fff !important';
-                        showMessage("Query looks valid!! No errors found!! Check Browser's CONSOLE to view the result of EXPLAIN.");
-                        console.table(explainTable);
-                    }
-                    else{ //if(!explainTable || explainTable.includes("Error:")){
-                        document.getElementById('query').style.color = 'orangered !important';
-                        showMessage(explainTable || "Please correct your query!", "err");            
-                    }
+// Used in validateOnSemiColon()
+const validate = function(stmt){
+    showMessage("Checking Query ", "loading");    
+    var conn_id = document.getElementById('conn').value;
+    var params = 'test=' + stmt + '&conn_id=' + conn_id;
+    
+    var http = new XMLHttpRequest();
+    http.open('POST', queryCheckerURL, true); // 3rd argument is sync / async 
+    http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+    http.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+    http.onreadystatechange = function() {
+        if (http.readyState == XMLHttpRequest.DONE){
+            if(IsJsonString(http.responseText)){
+                explainTable = JSON.parse(http.responseText);
+                if (typeof explainTable == "object"){
+                    document.getElementById('query').style.color = '#fff !important';
+                    showMessage("Query looks valid!! No errors found!! Check Browser's CONSOLE to view the result of EXPLAIN.");
+                    console.table(explainTable);
                 }
-                else
-                    showMessage("SOmething went wrong. This will be fixed in the next commit.", "err");
-                
-                hideMessageAfter(4000);
+                else{ //if(!explainTable || explainTable.includes("Error:")){
+                    document.getElementById('query').style.color = 'orangered !important';
+                    showMessage(explainTable || "Please correct your query!", "err");            
+                }
             }
-        }
-        http.send(params);
-    };
-    const validateOnSemiColon = function(stmt){
-        // Remove last semicolon
-        if (stmt.slice(-1) === ';'){
-            // Validate the line containing query
-            stmt = stmt.split(';')[0];
-            // This will avoid multiple semicolons at the end of query
-            // document.getElementById('query').value = stmt.replace(/(\r\n|\n|\r)/gm, "");
-            document.getElementById('query').value = stmt;
-            validate(stmt);
+            else
+                showMessage("SOmething went wrong. This will be fixed in the next commit.", "err");
             
-            // Format using sql-formatter.
-            let output = "";
-            (function() {
-                output = sqlFormatter.format(stmt, {
-                    language: 'mysql'
-                });
-            })();
-            document.getElementById('query').value = output;
+            hideMessageAfter(4000);
         }
-        else{
-            const queryTabs = document.querySelector('.queryTabs').classList;
-            if(queryTabs.contains('hide')) {
-                queryTabs.toggle('hide');
-                setTimeout(() => {
-                    document.querySelector('.queryTabs').classList.toggle('hide');
-                }, 3000);
-            }
-        }
-    };
+    }
+    http.send(params);
+};
 
-// Fire Query 
-    const execStmt = function(stmt){
-        if(typeof stmt !== 'string' || !stmt)
-            stmt = document.getElementById('query').value;
-        else
-            document.getElementById('query').value = stmt;
+///////////////////////////////////////////////////////////////////////
+//
+const validateOnSemiColon = function(stmt){
+    // Remove last semicolon
+    if (stmt.slice(-1) === ';') {
+        stmt = stmt.split(';')[0];
+        // This will avoid multiple semicolons at the end of query
+        validate(stmt);
         
-        // Save the pagination states before executing
-        for(i of [1,2,3,4])
-            localStorage.setItem('page-'+i, document.getElementById('page-'+i).value);    
+        // Format using sql-formatter.
+        document.getElementById('query').value = sqlFormatter.format(stmt, {language: 'mysql'});
+    }
+    else{
+        const tips = document.querySelector('.tips');
+        tips.innerHTML = "<i>Tip: Append a semicolon at the end of the your statement to validate it.</i>";
+        tips.classList.toggle('hide');
+        setTimeout(() => {
+            tips.classList.toggle('hide');
+        }, 3000);
+    }
+};
 
-        // validate(stmt);
-        showMessage("Executing Query ", "loading");
-        document.getElementById('fire').submit();    
-    };
+///////////////////////////////////////////////////////////////////////
+// Fire Query 
+const execStmt = function(stmt) {
+    if(typeof stmt !== 'string' || !stmt)
+        stmt = document.getElementById('query').value;
+    else
+        document.getElementById('query').value = stmt;
+    
+    // Save the pagination states before executing
+    for(i of [1,2,3,4])
+        localStorage.setItem('page-'+i, document.getElementById('page-'+i).value);    
+
+    // validate(stmt); // use this synchronously
+    showMessage("Executing Query ", "loading");
+    document.getElementById('fire').submit();    
+};
 document.querySelector('.execStmt').addEventListener('click', execStmt);
-document.getElementById('query').addEventListener('click', function() {
-    document.getElementById('sidebar').classList.contains('collapsed') || document.getElementById('sidebar').classList.toggle('collapsed');
-});
+
+///////////////////////////////////////////////////////////////////////
+// Execute Query when Ctrl-Enter is pressed
 document.getElementById('query').addEventListener('keydown', function(eventObj) {
-    // Execute Query when Ctrl-Enter is pressed
     if (eventObj.ctrlKey && eventObj.keyCode == 13) {
       execStmt(this.value);
     }
 });
 
-// Show Table from Sidebar.
-    const select_table = function(tbl){
-        document.getElementById('sidebar').classList.toggle('collapsed');
-        execStmt('SELECT * FROM ' + tbl + ' LIMIT 0,50;');
-    };
+///////////////////////////////////////////////////////////////////////
+// Fire a query <Select * From table> from Sidebar.
+// Used in home.html
+const select_table = function(tbl){
+    document.getElementById('sidebar').classList.toggle('collapsed');
+    execStmt('SELECT * FROM ' + tbl + ' LIMIT 0,50;');
+};
 
-// Breadcrumb functions
-    // Appends limit selected from pagination to the query and execute
-    const selectRange = function (range){
-        const stmtElem = document.getElementById('query');
-        let stmt = stmtElem.value;
-        
-        // replace query with only single spaces between words
-        stmt = stmt.replace(/\s\s+/g, ' ');
-        
-        // Removes LIMIT used at the END of query. Ignores LIMIT used in the middle of the query.
-        const limitPresent = stmt.lastIndexOf("LIMIT");
-        if (limitPresent !== -1 || limitPresent !== -1)
-            stmt = stmt.substring(0, limitPresent);
-        
-        stmtElem.value = stmt + ' LIMIT ' + range;
-        execStmt();
-    };
-    // Handles pagination
-    function scroll_pag(direction){
-        // 2 - RIGHT i.e. forward and 4 - LEFT i.e. backward
-        switch(direction){
-            case 2:
-                for(i of [1,2,3]){
-                    document.getElementById('page-'+i).value = document.getElementById('page-'+(i+1)).value;
-                    document.getElementById('page-'+i).innerText = document.getElementById('page-'+(i+1)).innerText;    
-                }
-                
-                const limits = document.getElementById('page-4').value;
-                const frm = parseInt(limits.split(',')[1]) + 1;
-                const to = parseInt(limits.split(',')[1]) + 50;
+///////////////////////////////////////////////////////////////////////
+document.getElementById('query').addEventListener('click', function() {
+    const sidebar =  document.getElementById('sidebar').classList;
+    sidebar.contains('collapsed') || sidebar.toggle('collapsed');
+});
 
-                document.getElementById('page-4').value = frm + ',' +  to;
-                document.getElementById('page-4').innerText = frm + '-' + to;
-            break;
-            case 4:
-
-                const lowest_limits = document.getElementById('page-1').value;
-                const lower_limit = parseInt(lowest_limits.split(',')[0]);
-                if(lower_limit <= 1){
-                    // stop
-                    // written this intentionally for code redability.
-                }
-                else{
-                    for(i of [4,3,2]){
-                        document.getElementById('page-'+i).value = document.getElementById('page-'+(i-1)).value;
-                        document.getElementById('page-'+i).innerText = document.getElementById('page-'+(i-1)).innerText;    
-                    }
-
-                    const to = lower_limit - 1;
-                    let frm = to - 50 + 1 ;
-                    if(frm == 1)
-                        frm = 0;
-
-                    document.getElementById('page-1').value = frm + ',' +  to;
-                    document.getElementById('page-1').innerText = frm + '-' + to;    
-                }                
-            break;
-            default:break;
-        }
-
-        // Remove active class from all of 'em
-        for (i of [1,2,3,4])
-            document.getElementById('page-'+i).classList.remove('active');
-        
-        // set the reqd. btn active by getting limit from localstorage.
-        var lmts = localStorage.getItem('limits');
-        var pag_btn = document.querySelectorAll("button[value='" + lmts + "']")[0];
-        if(pag_btn)
-            pag_btn.classList.add('active');
-        // selectRange(lmts);
-    };
-        
+///////////////////////////////////////////////////////////////////////
+// Appends limit selected from pagination to the query and execute
+const selectRange = function (range){
+    const stmtElem = document.getElementById('query');
+    let stmt = stmtElem.value;
     
-// an IIFE for detecting document ready.
+    // replace query with only single spaces between words
+    stmt = stmt.replace(/\s\s+/g, ' ');
+    
+    // Removes LIMIT used at the END of query. Ignores LIMIT used in the middle of the query.
+    const limitPresent = stmt.lastIndexOf("LIMIT");
+    if (limitPresent !== -1 || limitPresent !== -1)
+        stmt = stmt.substring(0, limitPresent);
+    
+    stmtElem.value = stmt + ' LIMIT ' + range;
+    execStmt();
+};
+
+///////////////////////////////////////////////////////////////////////
+// Handles pagination
+const scroll_pag = function(direction){
+    // 2 - RIGHT i.e. forward and 4 - LEFT i.e. backward
+    switch(direction){
+        case 2:
+            for(i of [1,2,3]){
+                const paginationBtn = document.getElementById('page-'+i);
+                paginationBtn.value = document.getElementById('page-'+(i+1)).value;
+                paginationBtn.innerText = document.getElementById('page-'+(i+1)).innerText;    
+            }
+            
+            const lastPaginationBtn = document.getElementById('page-4');
+            const limits = lastPaginationBtn.value;
+            const frm = parseInt(limits.split(',')[1]) + 1;
+            const to = parseInt(limits.split(',')[1]) + 50;
+            lastPaginationBtn.value = frm + ',' +  to;
+            lastPaginationBtn.innerText = frm + '-' + to;
+        break;
+        case 4:
+            const firstPaginationBtn = document.getElementById('page-1');
+            const lowest_limits = firstPaginationBtn.value;
+            const lower_limit = parseInt(lowest_limits.split(',')[0]);
+            if(lower_limit <= 1){
+                // stop
+                // written this intentionally for code redability.
+            }
+            else{
+                for(i of [4,3,2]){
+                    const paginationBtn = document.getElementById('page-'+i);
+                    paginationBtn.value = document.getElementById('page-'+(i-1)).value;
+                    paginationBtn.innerText = document.getElementById('page-'+(i-1)).innerText;    
+                }
+
+                const to = lower_limit - 1;
+                let frm = to - 50 + 1 ;
+                if(frm == 1)
+                    frm = 0;
+
+                firstPaginationBtn.value = frm + ',' +  to;
+                firstPaginationBtn.innerText = frm + '-' + to;    
+            }                
+        break;
+        default:break;
+    }
+
+    // Remove active class from all of 'em
+    for (i of [1,2,3,4])
+        document.getElementById('page-'+i).classList.remove('active');
+    
+    // set the reqd. btn active by getting limit from localstorage.
+    var lmts = localStorage.getItem('limits');
+    var pag_btn = document.querySelectorAll("button[value='" + lmts + "']")[0];
+    pag_btn && pag_btn.classList.add('active');
+};
+
+///////////////////////////////////////////////////////////////////////
+// an IIFE for detecting and registering document ready.
 (function(funcName, baseObj) {
     // The public function name defaults to window.docReady
     // but you can pass in your own object and own function name and those will be used
@@ -438,91 +408,125 @@ document.getElementById('query').addEventListener('keydown', function(eventObj) 
         }
     }
 })("docReady", window);
-        
-// A function that selects the correct breadcrumb on page load.
-    const setActiveLimits = function(limits){
-        // Fetch pagination details from localstorage and set
-        for(i of [1,2,3,4]){
-            document.getElementById('page-'+i).value = localStorage.getItem('page-'+i);
-            document.getElementById('page-'+i).innerText = localStorage.getItem('page-'+i).replace(',','-');
-            // Remove active class from all of 'em
-            document.getElementById('page-'+i).classList.remove('active');
+
+var lastTabID = 1; // this is the id of last tab used
+var maxTabs = 10;  // max number of tabs
+const tabs = [];   // stores queries
+
+const loadQueryTabs = function(){
+    document.querySelector("#queryTabs").innerHTML = "";
+    document.getElementById("query").value = "";
+
+    // Iterate Over all tabs saved in localstorage
+    for(let i =1; i<=maxTabs; i++) {
+        const qry = localStorage.getItem(`tab${i}`);
+        if(qry) {
+            console.log(qry);
+            tabs.push(qry);
+            document.querySelector("#queryTabs").innerHTML += `<a href="#" onclick="showTabContent(${i}, this);" id="tab${i}">Tab ${i}</a>`;
+            lastTabID = i; // the last index where a query was found.
         }
-        // set the  active limit
-        const pag_btn = document.querySelectorAll("button[value='" + limits + "']")[0];
-        if(pag_btn)
-            pag_btn.classList.add('active');
     };
 
-// Usage
+    // Show default one tab when no data in localstorage.
+    if (!tabs.length)
+        document.querySelector("#queryTabs").innerHTML += `<a href="#" class="active" onclick="showTabContent(1, this);" id="tab1">Tab 1</a>`;
+    else{
+        // Set last tab active
+        document.querySelector(`#tab${lastTabID}`).classList.add("active");
+        // Show last tab's query on queryEditor
+        document.getElementById("query").value = tabs.slice(-1);
+    }
+
+    // Add the "add new tab" button
+    document.querySelector("#queryTabs").innerHTML += `<a href="#" id="addQueryTab"> + </a>`;
+};
+
+///////////////////////////////////////////////////////////////////////
+// Saves current tab in localstorage BEFORE switching a Tab 
+// OR BEFORE creating a new tab.
+const saveTab = function(tabID){
+    console.log(`Saved tab${tabID}  => ` +  document.getElementById("query").value);
+    localStorage.setItem(`tab${tabID}`, document.getElementById("query").value);  
+};
+
+///////////////////////////////////////////////////////////////////////
+// Show a Tab 
+const showTabContent = function(tabID, this_tab){
+    // Save last used tab
+    saveTab(lastTabID);
+    // Remove active class from all childs
+    document.querySelector("#queryTabs").childNodes.forEach(function(val){val.classList = [];});
+    // Make current Tab Active
+    this_tab.classList.add("active");
+    // Show query from selected tab on queryEditor
+    document.getElementById("query").value = localStorage.getItem(`tab${tabID}`);
+    //set last used tab id as current's
+    lastTabID = tabID;
+};
+
+///////////////////////////////////////////////////////////////////////
+// Adds a new tab
+const addTab = function(){
+    // Remove Last child + 
+    document.querySelector("#queryTabs").lastElementChild.remove();
+    // Remove active class from all childs
+    document.querySelector("#queryTabs").childNodes.forEach(function(val){val.classList = [];});
+    // Add a new tab btn
+    lastTabID = document.querySelector("#queryTabs").childNodes.length;
+    document.querySelector("#queryTabs").innerHTML += `<a href="#" class="active" onclick="showTabContent(${++lastTabID},this);" id="tab${lastTabID}">Tab ${lastTabID}</a>`;
+    // Add back the Last child + 
+    document.querySelector("#queryTabs").innerHTML += `<a href="#" id="addQueryTab"> + </a>`;
+    // Clear the queryEditor.
+    document.getElementById("query").value = "";   
+};
+
+///////////////////////////////////////////////////////////////////////
+// call docReady
 docReady(function() {
     const stmtTxtArea = document.getElementById('query');
+    
+    ///////////////////////////////////////////////////////////////////////
     // Get the limits if set
     let stmt = stmtTxtArea.value.trim();    
     if(queryOk && stmt.toUpperCase().includes("LIMIT")){
         const limits = stmtTxtArea.value.split('LIMIT')[1].trim();
         localStorage.setItem('limits', limits);
-        setActiveLimits(limits);
+        
+        // Fetch pagination details from localstorage and set
+        for(i of [1,2,3,4]){
+            const paginationBtn = document.getElementById('page-'+i);
+            paginationBtn.value = localStorage.getItem('page-'+i);
+            paginationBtn.innerText = localStorage.getItem('page-'+i).replace(',','-');
+            // Remove active class from all of 'em
+            paginationBtn.classList.remove('active');
+        }
+        
+        // Set the  active limit
+        document.querySelectorAll("button[value='" + limits + "']")[0] && pag_btn.classList.add('active');
+        
+        const tips = document.querySelector('.tips');
+        tips.classList.toggle('hide');
+        tips.innerHTML = "<i>Tip: A single click on a cell inide result table copies its content to clipboard.</i>";
     }
+
+    loadQueryTabs();
+
+    ///////////////////////////////////////////////////////////////////////
+    // Save tabs state to localstorage On add new tab
+    document.getElementById("addQueryTab").addEventListener("click", function() {
+        saveTab(lastTabID);
+        addTab();
+    });
+
+    // Save tabs state to localstorage On switching tabs
+
 });
 
-// Sync tables in sidebar
-// document.querySelector('.syncTables').addEventListener('click', syncTables);
-
-
-// AJAX for syncing Tables
-// const syncTables = function(stmt){
-//     showMessage("Syncing Tables ", "loading");
-    
-//     var conn_id = document.getElementById('conn').value;
-//     var params = 'conn=' + conn_id + '&token=awesome&;
-    
-//     var http = new XMLHttpRequest();
-//     http.open('POST', syncTablesURL, true);
-//     http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-//     http.onreadystatechange = function() {
-//         if (http.readyState == XMLHttpRequest.DONE){
-//             if (http.responseText == "\"1\"")
-//                 showMessage("Query looks valid!! No errors found!!");
-//             else if(http.responseText != "")
-//                 showMessage(http.responseText, "err");            
-//             hideMessageAfter(4000);
-//         }
-//     }
-//     http.send(params);
-// }
-
-
-// https://stackoverflow.com/questions/5100539/django-csrf-check-failing-with-an-ajax-post-request
-// Used in validate()
-function getCookie(name) {
-    var cookieValue = null;
-    if (document.cookie && document.cookie != '') {
-        var cookies = document.cookie.split(';');
-        for (var i = 0; i < cookies.length; i++) {
-            var cookie = cookies[i].trim();
-            // Does this cookie string begin with the name we want?
-            if (cookie.substring(0, name.length + 1) == (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
-
-function IsJsonString(str) {
-    try {
-        JSON.parse(str);
-    } catch (e) {
-        return false;
-    }
-    return true;
-}
-
-  
 // To DO :
 // shw explain data somwhere.
+// btn for sync tables in sidebar
+// make this a single page html. add/edit form  on same page.
 // window.console = {
 //     table: function(str){
 //         var node = document.createElement("div");
@@ -530,5 +534,6 @@ function IsJsonString(str) {
 //         document.getElementById("query").appendChild(node);
 //     }
 // }
+// make a ajax common fn with async true / false param. use validate() before exec()
 
-// tabs based query. store in localStorage
+

@@ -147,11 +147,25 @@ table tr:last-child th:last-child {
 #content #sidebar > *:hover{
     color:orange;
 }
+#content #queryArea #queryTabs{
+    display:block;
+    z-index: 88888;
+    background-color:#111213;
+    border:1px solid #000;
+    font-size: 14px;
+    box-shadow: 1px 2px 4px #000;
+}
+#content #queryArea #queryTabs a{
+    padding: 8px 16px;
+}
+#content #queryArea #queryTabs a:hover , #content #queryArea #queryTabs a.active{
+    background-color: #515253;
+}
 #content #queryArea textarea{
     display:block;
     position: fixed;
     z-index: 88888;
-    background-color:#111213;
+    background-color:#515253;
     border:1px solid #000;
     width:84%;
     max-width:84%;

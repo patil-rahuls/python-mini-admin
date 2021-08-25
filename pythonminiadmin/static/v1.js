@@ -514,13 +514,18 @@ docReady(function() {
 
     ///////////////////////////////////////////////////////////////////////
     // Save tabs state to localstorage On add new tab
-    document.getElementById("addQueryTab").addEventListener("click", function() {
-        saveTab(lastTabID);
-        addTab();
+    document.addEventListener("click", function(e) {
+        if(e.target && e.target.id == "addQueryTab"){        
+            if(lastTabID < maxTabs){
+                saveTab(lastTabID);
+                addTab();
+            }
+            else{
+                showMessage("Maximum 10 Tabs Allowed. (You can set variable 'maxTabs' for as many tabs as you want.)", "err");
+                hideMessageAfter(3000);
+            }
+        }
     });
-
-    // Save tabs state to localstorage On switching tabs
-
 });
 
 // To DO :

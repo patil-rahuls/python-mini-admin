@@ -539,6 +539,23 @@ docReady(function() {
     // });
 });
 
+///////////////////////////////////////////////////////////////////////
+// ADD/EDIT CONNECTION FORM
+document.getElementById('save').addEventListener('click', function() {
+    const saveForm = document.getElementById("add");
+
+    for(const input of saveForm.elements){
+        input.value = input.value.trim();
+        if(!input.value)
+            return;
+    }
+
+    document.querySelector('.loading').classList.remove('hide');
+    for( input of saveForm.elements)
+        input.readOnly = true;
+    saveForm.submit();
+});
+
 // To DO :
 // btn for sync tables in sidebar
 // make a ajax common fn with async true / false param. use validate() before exec()

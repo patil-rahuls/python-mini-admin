@@ -1,4 +1,4 @@
-# python-mini-admin
+# pythonMiniAdmin _(Discontinued)_
 A Simple, Minimal and Lightweight tool for quick and easy access to MySQL databases. Developed in python using Django framework.
 
 ## Steps to intall:
